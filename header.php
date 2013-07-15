@@ -26,11 +26,11 @@ function curPageName() {
                     <?php
                         if(curPageName() == 'index.php'){
                         echo'<li class="active"><a href="index.php">Home</a></li>
-                        <li class=""><a href="contact.php">Contact Me</a></li>';
+                        <li class=""><a href="contact.php">Contact Us</a></li>';
                         }
                         elseif (curPageName() == 'contact.php') {
                         echo'<li class=""><a href="index.php">Home</a></li>
-                        <li class="active"><a href="contact.php">Contact Me</a></li>';
+                        <li class="active"><a href="contact.php">Contact Us</a></li>';
                         }
                         else{
                         echo'<li class=""><a href="index.php">Home</a></li>
@@ -54,6 +54,7 @@ function curPageName() {
                                         </a>
                                         <ul class=\"dropdown-menu\">
                                             <li><a href=\"profile.php?user=" . $_SESSION['username'] . "\">Profile</a></li>
+                                            <li><a href=\"messages.php\">Messages</a></li>
                                             <li><a href=\"settings.php\">Settings</a></li>
                                             <li class=\"divider\"></li>
                                             <li><a href=\"logout.php\">Logout</a></li>

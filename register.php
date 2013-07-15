@@ -1,4 +1,25 @@
+<?php
+  session_start();
 
+  if (isset($_POST['password']) && isset($_POST['email']) && isset($_POST['username']))
+  {
+    require 'database_connect.php';
+    $username = mysql_real_escape_string($_POST['username']);
+    $password = mysql_real_escape_string($_POST['password']);
+    $email = mysql_real_escape_string($_POST['email']);
+
+    $query_string = sprintf("INSERT INTO users (username, password, userType) VALUES ('%s', '%s', 'user')",
+      $username, $password);
+    $result = mysql_query( $query_string) or die(mysql_error());
+    $query_string = sprintf("INSERT INTO userDetail (username, email) VALUES ('%s', '%s')",
+      $username, $email);
+    $result = mysql_query( $query_string) or die(mysql_error());
+    $_SESSION['userType'] = 'user';
+    $_SESSION['username'] = $username;
+    header('Location: ./settings.php');
+
+  }
+?>
 
 <!DOCTYPE html>
 <html>
@@ -66,7 +87,7 @@
         <input type="password" class="input-block-level" placeholder="Password" name="password">
         <input type="password" class="input-block-level" placeholder="Confirm Password" name="confirmPassword">
         <center>
-        <button class="btn btn-large btn-primary" type="submit"name="submit">Register</button>
+        <button class="btn btn-large btn-primary" type="submit" name="submit">Register</button>
         </center>
       </form>
 

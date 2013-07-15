@@ -9,12 +9,22 @@ $age = $interval->format('%Y');
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Matthew O'Neill</title>
+        <title>Home</title>
     </head>
     <body>
     <?php include 'header.php'; ?>
-
-
+        <div class="hero-unit">
+          <h1>Welcome!</h1>
+          <p>The open source social network</p>
+          <p>
+            <a href="login.php" class="btn btn-primary btn-large">
+              Login
+            </a>
+            <a href="register.php"class="btn btn-primary btn-large">
+              Register
+            </a>
+          </p>
+        </div>
     <?php include 'footer.php';?>
     </body>
 </html>

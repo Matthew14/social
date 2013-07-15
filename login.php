@@ -21,7 +21,7 @@
              header('Location: ./admin.php');
           }
           else
-             header('Location: ./index.php');
+             header('Location: ./profile.php');
        }
        else
            header('Location: ./login.php?error=Incorrect+Login+Details');
