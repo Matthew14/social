@@ -1,5 +1,6 @@
 <?php
     session_start();
+    require 'database_connect.php';
     if (! isset($_SESSION['userType'])) {
         header('Location: ./login.php');
     }
@@ -59,6 +60,24 @@
                     </form>
                 </div>
                 <div class="span4 well">
+
+                      <?php
+                            $query_string = sprintf("SELECT * FROM users ORDER BY id DESC");
+                            $result = mysql_query($query_string) or die(mysql_error());
+                            $userRow = mysql_fetch_assoc($result);
+
+                            echo "<select class=\"input-large   \">";
+                            while("$userRow")
+                            {
+                                $un = $userRow['username'];
+                                echo "<option value=\"$un\"/>$un</option>";
+                                $userRow = mysql_fetch_assoc($result);
+                            }
+                            echo "</select>";
+                       ?>
+                       <a href="admin.php?delete=" class="btn btn-small">Delete</a>
+                       <a href="admin.php?ban=" class="btn btn-small">Ban</a>
+
                 </div>
                 <div class="span4 well">
                 </div>

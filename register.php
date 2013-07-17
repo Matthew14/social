@@ -1,23 +1,51 @@
 <?php
   session_start();
-
+  $error = '';
   if (isset($_POST['password']) && isset($_POST['email']) && isset($_POST['username']))
   {
     require 'database_connect.php';
     $username = mysql_real_escape_string($_POST['username']);
     $password = mysql_real_escape_string($_POST['password']);
+    $confirmPassword = mysql_real_escape_string($_POST['confirmPassword']);
     $email = mysql_real_escape_string($_POST['email']);
 
-    $query_string = sprintf("INSERT INTO users (username, password, userType) VALUES ('%s', '%s', 'user')",
-      $username, $password);
-    $result = mysql_query( $query_string) or die(mysql_error());
-    $query_string = sprintf("INSERT INTO userDetail (username, email) VALUES ('%s', '%s')",
-      $username, $email);
-    $result = mysql_query( $query_string) or die(mysql_error());
-    $_SESSION['userType'] = 'user';
-    $_SESSION['username'] = $username;
-    header('Location: ./settings.php');
+    $username = str_replace(' ', '', $username);
+    $password = str_replace(' ', '', $password);
+    $email = str_replace(' ', '', $email);
 
+    if (strlen($password) < 6)
+      $error = $error . " - Passwords must be 6 characters or more";
+    elseif($password == $confirmPassword)
+    {
+      $query_string = sprintf("SELECT id FROM users WHERE username='%s'", $username);
+      $result = mysql_query( $query_string) or die(mysql_error());
+      $row = mysql_fetch_assoc($result);
+
+      if($row || $username == '' || $username == ' ')
+        $error = $error . ' - Username already in use';
+      else
+      {
+        $query_string = sprintf("INSERT INTO users (username, password, userType) VALUES ('%s', '%s', 'user')",
+          $username, $password);
+        $result = mysql_query( $query_string) or die(mysql_error());
+        $query_string = sprintf("INSERT INTO userDetail (username, email) VALUES ('%s', '%s')",
+          $username, $email);
+        $result = mysql_query( $query_string) or die(mysql_error());
+
+        $_SESSION['userType'] = 'user';
+        $_SESSION['username'] = $username;
+        header('Location: ./settings.php');
+      }
+    }
+    else{
+      $error = $error . " - Passwords must match";
+    }
+    if (strlen($username) < 3) {
+      $error = $error . " - Username must be 3 characters or more";
+    }
+    if (strlen($email) < 3 || ! filter_var( $email, FILTER_VALIDATE_EMAIL )) {
+      $error = $error . " - Email not real";
+    }
   }
 ?>
 
@@ -26,7 +54,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Sign in</title>
+        <title>Sign Up</title>
         <link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
         <link rel="stylesheet" type="text/css" href="css/bootstrap-responsive.css" />
         <style type="text/css">
@@ -65,14 +93,17 @@
     <body>
         <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
         <script src="js/bootstrap.js"></script>
+
       <div class="container">
       <?php
-         if (isset($_GET['error']))
+         if (isset($error) && $error != ''){
             echo "<div class=\"alert alert-error\" id=\"formError\">
                    <button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>
-                   <strong>ERROR! </strong>" . $_GET['error'] . "
+                   <strong>ERROR! </strong>" . $error. "
                  </div>";
+         }
        ?>
+
        <ul class="nav nav-tabs">
         <li class="">
           <a href="login.php">Login</a>
@@ -86,12 +117,14 @@
 
         <input type="password" class="input-block-level" placeholder="Password" name="password">
         <input type="password" class="input-block-level" placeholder="Confirm Password" name="confirmPassword">
+
         <center>
         <button class="btn btn-large btn-primary" type="submit" name="submit">Register</button>
         </center>
       </form>
+      <center><a href="index.php">Home</a></center>
 
-    <?php include 'footer.php'; ?>
     </div> <!-- /container -->
+    <?php include 'footer.php'; ?>
  </body>
 </html>

@@ -3,7 +3,7 @@
         #footer
         {
             position: relative;
-            top: 50px;
+            top: 150px;
         }
     </style>
     <div id="footer">
@@ -14,6 +14,7 @@
             With
             <a target="_blank" href="http://twitter.github.io/bootstrap">Bootstrap</a>
             and PHP.
+            View the <a href="http://github.com/matthew14/social">GitHub</a> repo.
         </p>
       </div>
     </div>

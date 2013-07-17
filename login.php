@@ -11,6 +11,7 @@
 
        $result = mysql_query( $query_string) or die(mysql_error());
        $row = mysql_fetch_assoc($result);
+
        if ($row['password'] == $password)
        {
           $_SESSION['userType'] = $row['usertype'];
@@ -72,6 +73,7 @@
     <body>
         <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
         <script src="js/bootstrap.js"></script>
+
       <div class="container">
       <?php
          if (isset($_GET['error']))
@@ -94,8 +96,8 @@
         <button class="btn btn-large btn-primary" type="submit"name="submit">Sign in</button>
         </center>
       </form>
-
-    <?php include 'footer.php'; ?>
+      <center><a href="index.php">Home</a></center>
     </div> <!-- /container -->
- </body>
+    <?php include 'footer.php'; ?>
+    </body>
 </html>

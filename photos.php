@@ -34,10 +34,77 @@
         $location = $row['location'];
         $gender = $row['gender'];
     }
-    $query_string = sprintf("SELECT * FROM photos WHERE owner='%s'", $username);
+
+    /* ********************************************** */
+    //Upload Stuff
+
+    if (isset($_FILES['files']))
+    {
+        $error = '';
+        $success = '';
+        $userDirectory = "./images/$user";
+        $allowedExtensions = array("jpg", "jpeg", "png", "gif");
+        $allowedTypes = array("image/jpeg", "image/gif", "image/png");
+
+        //check if an image folder for the user exists
+        if (!file_exists($userDirectory) and !is_dir($userDirectory))
+            mkdir($userDirectory);
+
+        foreach ($_FILES['files']['tmp_name'] as $key => $tmpFile)
+        {
+
+            $fileType = $_FILES['files']['type'][$key]; //mime
+            $fileName = $_FILES['files']['name'][$key];
+            $fileExt = explode(".", $fileName)[1];
+            $errorCode = $_FILES['files']['error'][$key];
+
+            if ($errorCode != 0)
+            {
+                $error = $error . " - Error code $errorCode: ";
+                switch ($errorCode)
+                {
+                    case 1:
+                        $error = $error ."The uploaded file exceeds the upload_max_filesize ";
+                        break;
+                    case 2:
+                        $error = $error ."The uploaded file exceeds the MAX_FILE_SIZE ";
+                        break;
+                    case 3:
+                        $error = $error ."No file was uploaded ";
+                        break;
+                    case 7:
+                        $error = $error . "Failed to write file to disk ";
+                    default:
+                        break;
+                }
+            }
+
+            if(! in_array(strtolower($fileExt), $allowedExtensions))
+                $error = $error . " - $fileName's extension ($fileExt) is unsupported. Only .jpeg, .jpg, .png, and .gif allowed";
+
+            if(! in_array($fileType, $allowedTypes))
+                $error = $error . " - $fileName's file type ($fileType) is unsupported. Only jpegs, pngs, and gifs allowed";
+
+            elseif($error == '')
+            {
+                $filePath = $userDirectory . '/' . $fileName;
+                move_uploaded_file($tmpFile, $filePath);
+                $query_string = sprintf(
+                    "INSERT INTO photos (owner, album, name, url) VALUES ('%s','%s', '%s','%s')", $username, "1", $fileName, $filePath);
+
+                mysql_query($query_string) or die(mysql_error());
+                $success = $success . ' - Uploaded ' . $fileName;
+            }
+        }
+    }//end if isset(files)
+
+    /****************************************************/
+    //Get the user's images
+    $query_string = sprintf("SELECT * FROM photos WHERE owner='%s' ORDER BY id DESC", $username);
 
     $result = mysql_query($query_string) or die(mysql_error());
     $rowOfImages = mysql_fetch_assoc($result);
+    $numberOfImages = mysql_num_rows($result);
 ?>
 
 <!DOCTYPE html>
@@ -53,44 +120,98 @@
 
     <div class="container" style="position: relative; top: 40px;">
         <ul class="nav nav-tabs">
-        <li class="">
-          <a href="profile.php?user=<?php echo $user; ?>">Profile</a>
-        </li>
-        <li class="active"><a href="photos.php?user=<?php echo $user; ?>">Photos</a></li>
-        <li><a href="friends.php">Friends</a></li>
-      </ul>
+            <li class="">
+              <a href="profile.php?user=<?php echo $user; ?>">Profile</a>
+            </li>
+            <li class="active"><a href="photos.php?user=<?php echo $user; ?>">Photos</a></li>
+            <li><a href="friends.php">Friends</a></li>
+        </ul>
+
+        <?php
+            if (isset($error) && $error != '')
+            echo "<div class=\"alert alert-error\" id=\"formError\">
+                   <button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>
+                   <strong>ERROR! </strong> $error
+                 </div>";
+         if (isset($success) && $success != '')
+            echo "<div class=\"alert alert-success\" id=\"formSuccess\">
+                   <button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>
+                   <strong>Success! </strong> $success
+                 </div>";
+        ?>
+
+        <!-- Let's show an upload dialog if the user is on their own photos page only. -->
         <?php
             if ($user == $_SESSION['username'])
-                echo "<h1 style=\"font-size: 60px;\">$fullName's Photos <a href=\"uploadPhoto.php\" class=\"btn btn-large btn-primary\">Upload  Photo</a></h1>";
+            {?>
+
+                <h1 style=\"font-size: 60px;\"><?php echo $fullName ?>'s Photos</h1>
+                <div class="row-fluid">
+                    <div class="span4 well" id="uploadForm">
+                        <h2>Upload a Photo</h2>
+                        <p>Hold Ctrl to select multiple images (only works if your browser
+                            supports <a href="http://html5test.com/">HTML 5</a>)</p>
+                        <form method="post" action="" enctype="multipart/form-data">
+                            <input type="hidden" name="MAX_FILE_SIZE" size="40"/>
+                            <center><input type="file" name="files[]" accept="image/*"multiple="multiple"/><br />
+                            <input class="btn btn-primary btn-large" type="submit" value="Upload!" /></center>
+                        </form>
+                    </div>
+                    <div class="span8" >
+                       <div id="myCarousel" class="carousel carousel-slide">
+                          <div class="carousel-inner">
+                            <div class="item active">
+                              <img id="carouselPic" src="./images/quinn.jpg" alt="">
+                              <div class="container">
+
+                              </div>
+                            </div>
+                          </div>
+                        </div><!-- /.carousel -->
+
+                    </div>
+                </div>
+
+            <?php }
             else
                 echo "<h1 style=\"font-size: 60px;\">$fullName's Photos</h1>";
          ?>
-            <?php
 
+            <?php
+            $count = 3;
             while ($rowOfImages)
-            {?>
-                <div class="row-fluid" style="margin-top: 20px;">
-                    <div class="span4 well">
-                        <?php
-                            echo "<a href=\"" . $rowOfImages['url'] ."\"><img src=\"". $rowOfImages['url'] ."\"</a>";
-                        ?>
-                    </div>
-                    <div class="span4 well">
-                        <?php
-                            if ($rowOfImages = mysql_fetch_assoc($result))
-                                echo "<a href=\"" . $rowOfImages['url'] ."\"><img src=\"". $rowOfImages['url'] ."\"</a>";
-                        ?>
-                    </div>
-                    <div class="span4 well">
-                        <?php
-                            if ($rowOfImages = mysql_fetch_assoc($result))
-                                echo "<a href=\"" . $rowOfImages['url'] ."\"><img src=\"". $rowOfImages['url'] ."\"</a>";
-                        ?>
-                    </div>
-                </div>
-                <?php $rowOfImages = mysql_fetch_assoc($result);
+            {
+                $image = $rowOfImages['url'];
+                $name = $rowOfImages['name'];
+                ?>
+
+                <ul class="thumbnails">
+                    <li class="span4">
+                         <div class="thumbnail">
+                            <a href="<?php echo $image; ?>"><img src="<?php echo $image ?>" alt="<?php echo $name ?>"></a>
+                            <h3><?php echo $name ?></h3>
+                            <a class="btn" href="./changeProfilePic?return=pictures&pic=<?php echo $image ?>">Make This My Profile Picture</a>
+                        </div>
+
+                    </li>
+                </ul>
+                <?php
+                $rowOfImages = mysql_fetch_assoc($result);
             }?>
 
+        </div>
     <?php include 'footer.php'; ?>
     </body>
+    <style type="text/css">
+        #carouselPic
+        {
+
+            max-height: 300px;
+            width: 100%;
+        }
+        #uploadForm{
+            min-height: 300px;
+        }
+    </style>
+
 </html>

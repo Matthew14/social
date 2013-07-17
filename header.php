@@ -6,23 +6,35 @@ function curPageName() {
 ?>
 
 <link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
+<style type="text/css">
+    body{
+        padding-top: 40px;
+    }
+</style>
 <link rel="stylesheet" type="text/css" href="css/bootstrap-responsive.css" />
+
 
 <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
 <script src="js/bootstrap.js"></script>
 
-<div class="navbar navbar-static-top navbar-inverse">
+<div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
         <div class="container">
             <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
                 <span class="icon-circle-arrow-down"></span>
             </a>
+
             <a href="index.php" class="brand">Matthew's Social Network</a>
-            <form class="navbar-search" action="search.php" method="get">
-              <input type="text" class="search-query" placeholder="Search" name="term">
-            </form>
+
             <div class="nav-collapse collapse">
+
+                <form class="navbar-search" action="search.php" method="get">
+                  <input type="text" class="search-query" placeholder="Search" name="term">
+                </form>
+
+
                 <ul class="nav pull-right">
+                    <li><a href="search.php?term=">See All Users</a></li>
                     <?php
                         if(curPageName() == 'index.php'){
                         echo'<li class="active"><a href="index.php">Home</a></li>
@@ -44,28 +56,28 @@ function curPageName() {
                                 }
                                echo "<li class='$cssClass'><a href=\"admin.php\">Admin Panel</a></li>";
                            }
-                       }
-                           if ($_SESSION['userType'] == 'user' || $_SESSION['userType'] == 'admin')
-                           {
-                                $strToPrint = "<li>
-                                        <a class=\"dropdown-toggle\" data-toggle=\"dropdown\" href=\"profile.php?user=" . $_SESSION['username'] . "\">
-                                            <i class=\"icon-thumbs-up\"></i> " .  $_SESSION['username'] . "
-                                            <span class=\"caret\"></span>
-                                        </a>
-                                        <ul class=\"dropdown-menu\">
-                                            <li><a href=\"profile.php?user=" . $_SESSION['username'] . "\">Profile</a></li>
-                                            <li><a href=\"messages.php\">Messages</a></li>
-                                            <li><a href=\"settings.php\">Settings</a></li>
-                                            <li class=\"divider\"></li>
-                                            <li><a href=\"logout.php\">Logout</a></li>
-                                        </ul>
-                                </li>";
-                                echo "$strToPrint";
-                            }
-                            else
-                            {
-                                echo"<li><a href=\"login.php\">Login / Register</a></li>";
-                            }
+                        }
+                        if (isset($_SESSION['userType']) && ($_SESSION['userType'] == 'user' || $_SESSION['userType'] == 'admin'))
+                        {
+                            $strToPrint = "<li>
+                                    <a class=\"dropdown-toggle\" data-toggle=\"dropdown\" href=\"profile.php?user=" . $_SESSION['username'] . "\">
+                                        <i class=\"icon-thumbs-up\"></i> " .  $_SESSION['username'] . "
+                                        <span class=\"caret\"></span>
+                                    </a>
+                                    <ul class=\"dropdown-menu\">
+                                        <li><a href=\"profile.php?user=" . $_SESSION['username'] . "\">Profile</a></li>
+                                        <li><a href=\"messages.php\">Messages</a></li>
+                                        <li><a href=\"settings.php\">Settings</a></li>
+                                        <li class=\"divider\"></li>
+                                        <li><a href=\"logout.php\">Logout</a></li>
+                                    </ul>
+                            </li>";
+                            echo "$strToPrint";
+                        }
+                        else
+                        {
+                            echo"<li><a href=\"login.php\">Login / Register</a></li>";
+                        }
                         ?>
                 </ul>
             </div> <!-- Nav Collapse -->
