@@ -1,4 +1,5 @@
 <?php
+    //TODO: fix uplods of files with multiple dots
     session_start();
     require 'database_connect.php';
     if (! isset($_GET['user']))
@@ -55,7 +56,8 @@
 
             $fileType = $_FILES['files']['type'][$key]; //mime
             $fileName = $_FILES['files']['name'][$key];
-            $fileExt = explode(".", $fileName)[1];
+            $exploded = explode(".", $fileName);
+            $fileExt = $exploded[1];
             $errorCode = $_FILES['files']['error'][$key];
 
             if ($errorCode != 0)
@@ -97,7 +99,6 @@
             }
         }
     }//end if isset(files)
-
     /****************************************************/
     //Get the user's images
     $query_string = sprintf("SELECT * FROM photos WHERE owner='%s' ORDER BY id DESC", $username);

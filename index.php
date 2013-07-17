@@ -3,6 +3,10 @@ $now = new DateTime('now');
 $birth = new DateTime('91-11-14');
 $interval = $now->diff($birth);
 $age = $interval->format('%Y');
+$error = '';
+if (isset($_GET['error'])) {
+  $error = $error . ' - ' . $_GET['error'];
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -14,6 +18,18 @@ $age = $interval->format('%Y');
     <body>
     <?php include 'header.php'; ?>
     <div class="container" style="margin-top: 20px;">
+      <?php
+            if (isset($error) && $error != '')
+            echo "<div class=\"alert alert-error\" id=\"formError\">
+                   <button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>
+                   <strong>ERROR! </strong> $error
+                 </div>";
+         if (isset($success) && $success != '')
+            echo "<div class=\"alert alert-success\" id=\"formSuccess\">
+                   <button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>
+                   <strong>Success! </strong> $success
+                 </div>";
+        ?>
         <div class="hero-unit">
           <h1>Welcome!</h1>
           <p>The open source social network</p>
