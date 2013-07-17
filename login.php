@@ -19,7 +19,7 @@
           }
           else
           {
-             header('Location: ./profile.php');
+             header('Location: ./profile.php?user=' . $row['username']);
            }
        }
        else

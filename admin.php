@@ -1,6 +1,8 @@
 <?php
     session_start();
+    ob_start();
     require 'dbHelper.php';
+    $isAdmin = false;
     $dbo = new db();
     if (! isset($_SESSION['userType'])) {
         header('Location: ./login.php');
@@ -10,6 +12,7 @@
     }
     else
     {
+        $isAdmin = true;
         $message = NULL;
         if (isset($_FILES['file']))
         {
@@ -19,7 +22,8 @@
         }
     }
 ?>
-
+<?php if ($isAdmin)
+{ ?>
 <!DOCTYPE html>
 <html>
     <head>
@@ -88,3 +92,9 @@
     <?php include("footer.php"); ?>
     </body>
 </html>
+<?php }
+else
+{
+    echo "You are not an admin";
+}
+?>
