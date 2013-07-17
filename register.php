@@ -1,13 +1,17 @@
 <?php
+  //TODO: check emails better
   session_start();
+  ob_start();
   $error = '';
   if (isset($_POST['password']) && isset($_POST['email']) && isset($_POST['username']))
   {
-    require 'database_connect.php';
-    $username = mysql_real_escape_string($_POST['username']);
-    $password = mysql_real_escape_string($_POST['password']);
-    $confirmPassword = mysql_real_escape_string($_POST['confirmPassword']);
-    $email = mysql_real_escape_string($_POST['email']);
+    require 'dbHelper.php';
+    $dbo = new db();
+
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+    $confirmPassword = $_POST['confirmPassword'];
+    $email = $_POST['email'];
 
     $username = str_replace(' ', '', $username);
     $password = str_replace(' ', '', $password);
@@ -17,20 +21,12 @@
       $error = $error . " - Passwords must be 6 characters or more";
     elseif($password == $confirmPassword)
     {
-      $query_string = sprintf("SELECT id FROM users WHERE username='%s'", $username);
-      $result = mysql_query( $query_string) or die(mysql_error());
-      $row = mysql_fetch_assoc($result);
-
-      if($row || $username == '' || $username == ' ')
+      if($dbo->userExists($username) || $username == '' || $username == ' ')
         $error = $error . ' - Username already in use';
       else
       {
-        $query_string = sprintf("INSERT INTO users (username, password, userType) VALUES ('%s', '%s', 'user')",
-          $username, $password);
-        $result = mysql_query( $query_string) or die(mysql_error());
-        $query_string = sprintf("INSERT INTO userDetail (username, email) VALUES ('%s', '%s')",
-          $username, $email);
-        $result = mysql_query( $query_string) or die(mysql_error());
+        if (! $dbo->createUser($username, $password, $email))
+          $error = $error . ' - an error occured';
 
         $_SESSION['userType'] = 'user';
         $_SESSION['username'] = $username;

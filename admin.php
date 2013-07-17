@@ -1,6 +1,7 @@
 <?php
     session_start();
-    require 'database_connect.php';
+    require 'dbHelper.php';
+    $dbo = new db();
     if (! isset($_SESSION['userType'])) {
         header('Location: ./login.php');
     }
@@ -62,21 +63,22 @@
                 <div class="span4 well">
 
                       <?php
-                            $query_string = sprintf("SELECT * FROM users ORDER BY id DESC");
-                            $result = mysql_query($query_string) or die(mysql_error());
-                            $userRow = mysql_fetch_assoc($result);
-
-                            echo "<select class=\"input-large   \">";
-                            while("$userRow")
+                            $query = $dbo->getAllUsers();
+                            $numUsers = $query->rowCount();
+                            echo "<p>There are $numUsers users registered.</p>";
+                            echo "<select class=\"input-large\" multiple='multiple'>";
+                            while($row = $query->fetch(PDO::FETCH_ASSOC))
                             {
-                                $un = $userRow['username'];
+                                $un = $row['username'];
                                 echo "<option value=\"$un\"/>$un</option>";
-                                $userRow = mysql_fetch_assoc($result);
                             }
                             echo "</select>";
                        ?>
+                       <br />
+                       <!-- TODO: Implement -->
                        <a href="admin.php?delete=" class="btn btn-small">Delete</a>
                        <a href="admin.php?ban=" class="btn btn-small">Ban</a>
+                       <a href="admin.php?makeAdmin=" class="btn btn-small">Make Admin</a>
 
                 </div>
                 <div class="span4 well">

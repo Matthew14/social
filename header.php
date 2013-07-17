@@ -24,17 +24,14 @@ function curPageName() {
                 <span class="icon-circle-arrow-down"></span>
             </a>
 
-            <a href="index.php" class="brand">Matthew's Social Network</a>
+            <a href="index.php" class="brand">Social Network</a>
 
             <div class="nav-collapse collapse">
 
                 <form class="navbar-search" action="search.php" method="get">
-                  <input type="text" class="search-query" placeholder="Search" name="term">
+                  <input type="text" class="search-query" placeholder="Search - Leave Blank for All Users" name="term">
                 </form>
-
-
                 <ul class="nav pull-right">
-                    <li><a href="search.php?term=">See All Users</a></li>
                     <?php
                         if(curPageName() == 'index.php'){
                         echo'<li class="active"><a href="index.php">Home</a></li>

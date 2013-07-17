@@ -1,18 +1,14 @@
 <?php
     if (isset($_GET['term']))
     {
-        require 'database_connect.php';
-        $term = mysql_real_escape_string($_GET['term']);
+        $term = $_GET['term'];
+        require 'dbHelper.php';
+        $dbo = new db();
 
         if ($term == '' || $term == ' ')
-            $query_string = sprintf('SELECT * FROM users INNER JOIN userDetail on users.username =userDetail.username');
+            $query = $dbo->getAllUsers();
         else
-        {
-            $query_string = sprintf(
-                "SELECT * FROM users INNER JOIN userDetail on users.username=userDetail.username WHERE users.username LIKE'%s'", $term);
-        }
-        $result = mysql_query( $query_string) or die(mysql_error());
-        $row = mysql_fetch_assoc($result);
+            $query = $dbo->getUserDetails($term);
     }
  ?>
 
@@ -21,15 +17,17 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Profile Settings</title>
+        <title>Search</title>
     </head>
 
     <body>
         <?php include 'header.php'; ?>
         <div class="container">
-            <?php
-            $count = 0;
-            while ($row)
+            <h3>Your search for <?php
+            $plural = $query->rowCount() > 1 ? "results" : "result";
+             echo "'$term' returned ". $query->rowCount() . ' ' . $plural ?></h3>
+           <?php
+            while ($row = $query->fetch(PDO::FETCH_ASSOC))
             {?>
                 <a href="./profile.php?user=<?php echo $row['username']?>">
                     <div class="row-fluid" style="margin-top: 20px;">
@@ -44,13 +42,7 @@
                         </div>
                     </div>
                 </a>
-                <?php
-                $row = mysql_fetch_assoc($result);
-                $count++;
-            }
-
-            echo $count > 1 ? "There were $count results for your search" : "There was $count result for your search";
-            ?>
+            <?php } ?>
         </div>
         <?php include 'footer.php'; ?>
     </body>

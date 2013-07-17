@@ -1,19 +1,15 @@
 <?php
    session_start();
-   require 'database_connect.php';
+   ob_start();
+   require 'dbHelper.php';
 
+   $dbo = new db();
+   $errorMessage = '';
    if (isset($_POST['submit']))
    {
-       $username = mysql_real_escape_string($_POST['username']);
-       $password = mysql_real_escape_string($_POST['password']);
-
-       $query_string = sprintf("SELECT * FROM users WHERE username='%s'", $username);
-
-       $result = mysql_query( $query_string) or die(mysql_error());
-       $row = mysql_fetch_assoc($result);
-
-       if ($row['password'] == $password)
+       if ($row = $dbo->verifyLogin($_POST['username'], $_POST['password']))
        {
+
           $_SESSION['userType'] = $row['usertype'];
           $_SESSION['username'] = $row['username'];
 
@@ -22,10 +18,12 @@
              header('Location: ./admin.php');
           }
           else
+          {
              header('Location: ./profile.php');
+           }
        }
        else
-           header('Location: ./login.php?error=Incorrect+Login+Details');
+           $errorMessage = $errorMessage . ' - Incorrect username or password';
    }
 ?>
 
@@ -76,10 +74,10 @@
 
       <div class="container">
       <?php
-         if (isset($_GET['error']))
+         if (isset($errorMessage) && $errorMessage != '')
             echo "<div class=\"alert alert-error\" id=\"formError\">
                    <button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>
-                   <strong>ERROR! </strong>" . $_GET['error'] . "
+                   <strong>ERROR! </strong>" . $errorMessage . "
                  </div>";
        ?>
        <ul class="nav nav-tabs">

@@ -1,26 +1,31 @@
 <?php
+//TODO: make this visible to only logged in users
     session_start();
-    require 'database_connect.php';
+    require 'dbHelper.php';
+    $dbo = new db();
+
     if (! isset($_GET['user']))
     {
         if (! isset($_SESSION['username']))
         {
-            header('Location: ./login.php');
+            $dbo->close();
+            unset($dbo);
+            header('Location: ./logout.php');
         }
         else
+        {
+            $dbo->close();
+            unset($dbo);
             $user = $_SESSION['username'];
+        }
     }
     else
     {
         $user = $_GET['user'];
     }
+    $query = $dbo->getUserDetails($user);
 
-    $username = mysql_real_escape_string($user);
-    $query_string = sprintf("SELECT * FROM userDetail WHERE username='%s'", $username);
-
-    $result = mysql_query($query_string) or die(mysql_error());
-    $row = mysql_fetch_assoc($result);
-    if ($row)
+    if ($row = $query->fetch(PDO::FETCH_ASSOC))
     {
         $fullName = $row['firstName'] . ' ' . $row['surname'];
 

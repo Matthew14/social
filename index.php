@@ -4,8 +4,11 @@ $birth = new DateTime('91-11-14');
 $interval = $now->diff($birth);
 $age = $interval->format('%Y');
 $error = '';
-if (isset($_GET['error'])) {
+if (isset($_GET['error']))
   $error = $error . ' - ' . $_GET['error'];
+$success = '';
+if (isset($_GET['success'])) {
+  $success = $success . ' - ' . $_GET['success'];
 }
 ?>
 <!DOCTYPE html>

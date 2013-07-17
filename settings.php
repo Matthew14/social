@@ -1,80 +1,73 @@
 <?php
     session_start();
+    require 'dbHelper.php';
+
+    $dbo = new db();
+
     if (isset($_SESSION['username']))
         $username = $_SESSION['username'];
     else
         header('Location: ./login.php');
 
-    require 'database_connect.php';
-
     $successMessage = '';
+    $errorMessage = '';
 
     if (isset($_POST['about']) && $_POST['about'] != '')
     {
-        $about = mysql_real_escape_string($_POST['about']);
-
-        $query_string = sprintf("UPDATE userDetail SET about='%s' WHERE username='%s'"
-            , $about, $username);
-        $result = mysql_query( $query_string) or die(mysql_error());
+        $about = $_POST['about'];
+        $dbo->updateProfileInfo($username, $about, 'about');
         $successMessage = $successMessage . 'Updated About Me ' ;
     }
     if (isset($_POST['firstName']) && $_POST['firstName'] != '')
     {
-        $firstName = mysql_real_escape_string($_POST['firstName']);
-        $query_string = sprintf("UPDATE userDetail SET firstName='%s' WHERE username='%s'"
-            , $firstName, $username);
-        $result = mysql_query( $query_string) or die(mysql_error());
+        $firstName = $_POST['firstName'];
+        $dbo->updateProfileInfo($username, $firstName, 'firstName');
         $successMessage = $successMessage . '- Updated First Name ';
     }
     if (isset($_POST['surname']) && $_POST['surname'] != '')
     {
-        $surname = mysql_real_escape_string($_POST['surname']);
-        $query_string = sprintf("UPDATE userDetail SET surname='%s' WHERE username='%s'"
-            , $surname, $username);
-        $result = mysql_query( $query_string) or die(mysql_error());
+        $surname = $_POST['surname'];
+        $dbo->updateProfileInfo($username, $surname, 'surname');
         $successMessage = $successMessage . '- Updated Surname ';
     }
     if (isset($_POST['gender']) && $_POST['gender'] != '')
     {
-        $gender = mysql_real_escape_string($_POST['gender']);
-        $query_string = sprintf("UPDATE userDetail SET gender='%s' WHERE username='%s'"
-            , $gender, $username);
-        $result = mysql_query( $query_string) or die(mysql_error());
+        $gender = $_POST['gender'];
+        $dbo->updateProfileInfo($username, $gender, 'gender');
         $successMessage = $successMessage . '- Updated Gender ';
     }
     if (isset($_POST['location']) && $_POST['location'] != '')
     {
-        $location = mysql_real_escape_string($_POST['location']);
-        $query_string = sprintf("UPDATE userDetail SET location='%s' WHERE username='%s'"
-            , $location, $username);
-        $result = mysql_query( $query_string) or die(mysql_error());
+        $location = $_POST['location'];
+        $dbo->updateProfileInfo($username, $location, 'location');
         $successMessage = $successMessage . '- Updated Location ';
     }
     if (isset($_POST['dob'])) {
         $dob = $_POST['dob'];
         if ($dob != '')
         {
-        $query_string = sprintf("UPDATE userDetail SET dob='%s' WHERE username='%s'"
-            , $dob, $username);
-        $result = mysql_query( $query_string) or die(mysql_error());
-        $successMessage = $successMessage . '- Updated Date of Birth ';
-    }
+            $dbo->updateProfileInfo($username, $dob, 'dob');
+            $successMessage = $successMessage . '- Updated Date of Birth ';
+        }
     }
     if (isset($_POST['password']) && isset($_POST['confirmPassword']))
     {
-        $password = mysql_real_escape_string($_POST['password']);
-        $confirmPassword = mysql_real_escape_string($_POST['confirmPassword']);
+        $password = $_POST['password'];
+        $confirmPassword = $_POST['confirmPassword'];
+
         if ($password != $confirmPassword)
-            $errorMessage = "Passwords must match. ";
-        else
+            $errorMessage = $errorMessage ." - Passwords must match. ";
+        elseif (strlen($password) < 6 && strlen($password) > 0) {
+            $errorMessage = $errorMessage ." - Passwords must be 6 characters or more. ";
+        }
+        elseif(strlen($password) > 0)
         {
-            $query_string = sprintf("UPDATE users SET password='%s' WHERE username='%s'"
-            , $password, $username);
-            $result = mysql_query( $query_string) or die(mysql_error());
+            $dbo->updateProfileInfo($username, $password, 'password');
             $successMessage = $successMessage . '- Updated Password ';
         }
-
     }
+    if($successMessage == '' && $errorMessage == '' && isset($_POST['submit']))
+        $blueMessage = 'Nothing was updated'
  ?>
 <!DOCTYPE html>
 <html>
@@ -87,7 +80,7 @@
     <body>
         <?php include 'header.php'; ?>
         <?php
-         if (isset($errorMessage))
+         if (isset($errorMessage) && $errorMessage != '')
             echo "<div class=\"alert alert-error\" id=\"formError\">
                    <button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>
                    <strong>ERROR! </strong> $errorMessage
@@ -97,30 +90,41 @@
                    <button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>
                    <strong>Success! </strong> $successMessage
                  </div>";
+        if (isset($blueMessage) && $blueMessage != '')
+            echo "<div class=\"alert alert-info\" id=\"formError\">
+                   <button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>
+                   $blueMessage
+                 </div>";
        ?>
         <div class="container">
+            <form method="post" action="">
+            <div class="row-fluid">
+                <div class="span4">
+                    <h3>Update your details</h3>
+                </div>
+                <div class="span4 offset4">
+                    <div class="control-group">
+                        <div class="controls">
+                            <br/><button type="submit" class="btn btn-primary btn-large" name="submit">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="row-fluid" style="margin-top: 20px;">
                 <div class="span4 well">
                     <h2>About Me</h2>
-                    <form method="post" action="">
                         <div class="control-group">
                             <label class="control-label" for="textAreaAbout">About</label>
                             <div class="controls">
                               <textarea maxlength="15000" rows="12" class="input-xlarge" id="textAreaAbout" name="about" placeholder="About Me"></textarea>
                             </div>
                         </div>
-                        <div class="control-group">
-                            <div class="controls">
-                                <center><br/><button type="submit" class="btn btn-primary btn-large">Save</button></center>
-                            </div>
-                        </div>
-                    </form>
                 </div>
 
                 <div class="span4 well">
                     <h2>Details</h2>
                     <h4>Not all fields required</h4>
-                    <form method="post" action="">
+
                         <div class="control-group">
                             <label class="control-label" for="inputFirstName">First Name</label>
                             <div class="controls">
@@ -151,17 +155,10 @@
                               <input id="inputDOB" type="date" class="input-xlarge" name="dob" placeholder="Date of Birth"/>
                             </div>
                         </div>
-                        <div class="control-group">
-                            <div class="controls">
-                                <center><br/><button type="submit" class="btn btn-primary btn-large">Save</button></center>
-                            </div>
-                        </div>
-                    </form>
                 </div>
                 <div class="span4 well">
                     <h2>Login Details</h2>
                     <h4>Not all fields required</h4>
-                    <form method="post" action="">
                         <div class="control-group">
                             <label class="control-label" for="inputusername">New Username</label>
                             <div class="controls">
@@ -180,14 +177,9 @@
                               <input id="inputConfirmPassword"class="input-xlarge" type="password" name="confirmPassword" placeholder="Confirm Password"/>
                             </div>
                         </div>
-                        <div class="control-group">
-                            <div class="controls">
-                                <center><br/><button type="submit" class="btn btn-primary btn-large">Save</button></center>
-                            </div>
-                        </div>
-                    </form>
                 </div>
             </div>
+        </form>
         </div>
 
         <?php include 'footer.php'; ?>

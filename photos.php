@@ -1,12 +1,13 @@
 <?php
     //TODO: fix uplods of files with multiple dots
     session_start();
-    require 'database_connect.php';
+    require 'dbHelper.php';
+    $dbo = new db();
     if (! isset($_GET['user']))
     {
         if (! isset($_SESSION['username']))
         {
-            header('Location: ./login.php');
+            header('Location: ./logout.php');
         }
         else
             $user = $_SESSION['username'];
@@ -15,13 +16,12 @@
     {
         $user = $_GET['user'];
     }
+    /***********************************************/
+    //Get user's details
 
-    $username = mysql_real_escape_string($user);
-    $query_string = sprintf("SELECT * FROM userDetail WHERE username='%s'", $username);
+    $query = $dbo->getUserDetails($user);
 
-    $result = mysql_query($query_string) or die(mysql_error());
-    $row = mysql_fetch_assoc($result);
-    if ($row)
+    if ($row = $query->fetch(PDO::FETCH_ASSOC))
     {
         $fullName = $row['firstName'] . ' ' . $row['surname'];
 
@@ -57,7 +57,7 @@
             $fileType = $_FILES['files']['type'][$key]; //mime
             $fileName = $_FILES['files']['name'][$key];
             $exploded = explode(".", $fileName);
-            $fileExt = $exploded[1];
+            $fileExt = end($exploded);
             $errorCode = $_FILES['files']['error'][$key];
 
             if ($errorCode != 0)
@@ -91,21 +91,17 @@
             {
                 $filePath = $userDirectory . '/' . $fileName;
                 move_uploaded_file($tmpFile, $filePath);
-                $query_string = sprintf(
-                    "INSERT INTO photos (owner, album, name, url) VALUES ('%s','%s', '%s','%s')", $username, "1", $fileName, $filePath);
-
-                mysql_query($query_string) or die(mysql_error());
+                $dbo->newPhoto($username, "1", $filePath, $fileName);
                 $success = $success . ' - Uploaded ' . $fileName;
             }
         }
     }//end if isset(files)
-    /****************************************************/
-    //Get the user's images
-    $query_string = sprintf("SELECT * FROM photos WHERE owner='%s' ORDER BY id DESC", $username);
 
-    $result = mysql_query($query_string) or die(mysql_error());
-    $rowOfImages = mysql_fetch_assoc($result);
-    $numberOfImages = mysql_num_rows($result);
+    /*************************************************/
+    //Get the user's images
+    $userImagesQuery = $dbo->getUserPhotos($user);
+    $numberOfImages = $userImagesQuery->rowCount();
+
 ?>
 
 <!DOCTYPE html>
@@ -143,7 +139,7 @@
 
         <!-- Let's show an upload dialog if the user is on their own photos page only. -->
         <?php
-            if ($user == $_SESSION['username'])
+            if (isset($_SESSION['username']) && $user == $_SESSION['username'])
             {?>
 
                 <h1 style=\"font-size: 60px;\"><?php echo $fullName ?>'s Photos</h1>
@@ -180,7 +176,7 @@
 
             <?php
             $count = 3;
-            while ($rowOfImages)
+            while ($rowOfImages = $userImagesQuery->fetch(PDO::FETCH_ASSOC))
             {
                 $image = $rowOfImages['url'];
                 $name = $rowOfImages['name'];
@@ -196,9 +192,7 @@
 
                     </li>
                 </ul>
-                <?php
-                $rowOfImages = mysql_fetch_assoc($result);
-            }?>
+            <?php } ?>
 
         </div>
     <?php include 'footer.php'; ?>

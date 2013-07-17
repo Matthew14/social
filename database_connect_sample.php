@@ -1,9 +1,18 @@
 <?php
-    $host = "";
-    $dbUsername = "";
-    $password = "";
-    $database_name = "";
+    //Fill in the blanks:
+    $databaseEngine = "mysql";
 
-    $connection = mysql_connect($host, $dbUsername, $password, $database_name) or die(mysql_error());
-    mysql_select_db($database_name, $connection) or die(mysql_error());
+    $databaseHost = "";
+    $databaseUsername = "";
+    $databasePassword = "";
+    $databaseName = "";
+
+    //for testing on a local development server:
+    if ($_SERVER['SERVER_NAME'] == 'localhost')
+    {
+        $databaseHost = "";
+        $databaseUsername = "";
+        $databasePassword = "";
+        $databaseName = "";
+    }
 ?>
