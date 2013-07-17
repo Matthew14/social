@@ -1,16 +1,7 @@
--- phpMyAdmin SQL Dump
--- version 2.11.11.3
--- http://www.phpmyadmin.net
---
--- Host: 172.16.4.118
--- Generation Time: Jul 15, 2013 at 02:17 PM
--- Server version: 5.0.83
--- PHP Version: 5.3.3
-
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
 --
--- Database: `db1280529_social`
+-- 
 --
 
 -- --------------------------------------------------------
