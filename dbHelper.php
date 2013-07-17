@@ -2,6 +2,7 @@
 
     // ini_set('error_reporting', E_ALL);
     // ini_set( 'display_errors', 1 );
+    //
     /**
     * provides a dbHelper object with methods we'll need in the app
     */
@@ -60,6 +61,39 @@
         public function getUserDetails($username)
         {
             $queryString = "SELECT * FROM users INNER JOIN userDetail on users.username=userDetail.username WHERE users.username LIKE '$username'";
+            $query = $this->dbo->query($queryString);
+
+            return $query;
+        }
+
+        public function searchUsers($searchTerm, $start, $goFor)
+        {
+            /**
+            *   $start:
+            *       the start of the LIMIT. Expects -1 if no LIMIT
+            *   $goFor:
+            *       the end of the LIMIT. Expects -1 if no LIMIT
+            */
+
+            //TODO: better search
+            $start = (int)$start;
+            $goFor = (int)$goFor;
+
+            //base search:
+            $queryString = "SELECT * FROM users INNER JOIN userDetail on users.username=userDetail.username";
+
+            if (str_replace(' ', '', $searchTerm) != '')
+                $queryString = $queryString . " WHERE users.username LIKE '$searchTerm'";
+
+            if ($goFor != -1 && $start == -1)
+                $queryString = $queryString .  " LIMIT 0, $goFor";
+
+            elseif ($start != -1 && $goFor == -1)
+                $queryString = $queryString .  " LIMIT $start, 2372662636281763";
+
+            elseif($start != -1 && $goFor != -1)
+                $queryString = $queryString .  " LIMIT $start, $goFor";
+
             $query = $this->dbo->query($queryString);
 
             return $query;
